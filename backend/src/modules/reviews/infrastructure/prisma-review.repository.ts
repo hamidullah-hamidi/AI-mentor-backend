@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import type { ProjectSection } from "../../projects/domain/project";
 import type {
   ReadinessSnapshot,
@@ -189,7 +189,7 @@ export class PrismaReviewRepository implements ReviewRepository {
   }
 
   public async completeReview(input: ReviewCompletionInput): Promise<ReviewRun> {
-    const review = await this.prisma.$transaction(async (transaction) => {
+    const review = await this.prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       await transaction.reviewIssue.deleteMany({
         where: {
           reviewRunId: input.reviewRunId,
@@ -395,7 +395,7 @@ export class PrismaReviewRepository implements ReviewRepository {
   public async saveReadinessSnapshot(
     input: Omit<ReadinessSnapshot, "id" | "createdAt">,
   ): Promise<ReadinessSnapshot> {
-    const snapshot = await this.prisma.$transaction(async (transaction) => {
+    const snapshot = await this.prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       const created = await transaction.readinessSnapshot.create({
         data: {
           projectId: input.projectId,

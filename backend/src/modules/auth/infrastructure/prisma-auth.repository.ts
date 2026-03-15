@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import type { AuthRepository, StoredRefreshToken } from "../domain/auth.repository";
 import type { User, UserWithPassword } from "../../users/domain/user";
 
@@ -66,7 +66,7 @@ export class PrismaAuthRepository implements AuthRepository {
     fullName: string;
     passwordHash: string;
   }): Promise<User> {
-    const result = await this.prisma.$transaction(async (transaction) => {
+    const result = await this.prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       const user = await transaction.user.create({
         data: {
           email: input.email,

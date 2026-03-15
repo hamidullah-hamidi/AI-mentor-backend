@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import type { SubscriptionPlan } from "../../billing/domain/billing";
 import type { AdminRepository } from "../domain/admin.repository";
 import type { AdminUsageUserSummary, GuidelinePack, PromptTemplate, PlanUpsertInput } from "../domain/admin";
@@ -90,7 +90,7 @@ export class PrismaAdminRepository implements AdminRepository {
     rules: Record<string, unknown>;
     isDefault: boolean;
   }): Promise<GuidelinePack> {
-    const guidelinePack = await this.prisma.$transaction(async (transaction) => {
+    const guidelinePack = await this.prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       if (input.isDefault) {
         await transaction.guidelinePack.updateMany({
           where: {
@@ -243,17 +243,27 @@ export class PrismaAdminRepository implements AdminRepository {
       },
     });
 
-    return users.map((user) => ({
+    return users.map((user: {
+      id: string;
+      email: string;
+      fullName: string;
+      role: "USER" | "ADMIN";
+      creditWallet: { balance: number } | null;
+      aiUsageLogs: Array<{ technicalTotalTokens: number; billedCredits: number }>;
+    }) => ({
       id: user.id,
       email: user.email,
       fullName: user.fullName,
       role: user.role,
       walletBalance: user.creditWallet?.balance ?? 0,
       totalTechnicalTokens: user.aiUsageLogs.reduce(
-        (total, usage) => total + usage.technicalTotalTokens,
+        (total: number, usage: { technicalTotalTokens: number }) => total + usage.technicalTotalTokens,
         0,
       ),
-      totalBilledCredits: user.aiUsageLogs.reduce((total, usage) => total + usage.billedCredits, 0),
+      totalBilledCredits: user.aiUsageLogs.reduce(
+        (total: number, usage: { billedCredits: number }) => total + usage.billedCredits,
+        0,
+      ),
     }));
   }
 }

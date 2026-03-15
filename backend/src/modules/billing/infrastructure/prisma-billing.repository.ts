@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import { StatusCodes } from "http-status-codes";
 import { AppError } from "../../../shared/errors/app-error";
 import type {
@@ -152,7 +152,14 @@ export class PrismaBillingRepository implements BillingRepository {
       activeSubscription: activeSubscription ? mapSubscription(activeSubscription) : null,
       plans: plans.map(mapPlan),
       recentTransactions: recentTransactions.map(mapTransaction),
-      recentUsage: recentUsage.map((usage) => ({
+      recentUsage: recentUsage.map((usage: {
+        id: string;
+        model: string;
+        technicalTotalTokens: number;
+        billedCredits: number;
+        status: "SUCCESS" | "FAILED" | "SKIPPED";
+        createdAt: Date;
+      }) => ({
         id: usage.id,
         model: usage.model,
         technicalTotalTokens: usage.technicalTotalTokens,
@@ -183,7 +190,7 @@ export class PrismaBillingRepository implements BillingRepository {
       totalTokens: number;
     };
   }): Promise<number> {
-    await this.prisma.$transaction(async (transaction) => {
+    await this.prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       const wallet = await transaction.creditWallet.findUnique({
         where: {
           userId: input.userId,

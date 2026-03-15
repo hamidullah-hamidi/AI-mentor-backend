@@ -21,38 +21,49 @@ export class ProjectController {
   }
 
   public async getProject(request: Request, response: Response): Promise<void> {
-    const project = await this.projectService.getProject(request.params.projectId, request.auth!.userId);
+    const { projectId } = request.params as { projectId: string };
+    const project = await this.projectService.getProject(projectId, request.auth!.userId);
     response.status(StatusCodes.OK).json(successResponse(project));
   }
 
   public async updateProject(request: Request, response: Response): Promise<void> {
+    const { projectId } = request.params as { projectId: string };
     const project = await this.projectService.updateProject({
       ownerId: request.auth!.userId,
-      projectId: request.params.projectId,
+      projectId,
       ...request.body,
     });
     response.status(StatusCodes.OK).json(successResponse(project));
   }
 
   public async archiveProject(request: Request, response: Response): Promise<void> {
-    await this.projectService.archiveProject(request.params.projectId, request.auth!.userId);
+    const { projectId } = request.params as { projectId: string };
+    await this.projectService.archiveProject(projectId, request.auth!.userId);
     response.status(StatusCodes.OK).json(successResponse({ archived: true }));
   }
 
   public async getSection(request: Request, response: Response): Promise<void> {
+    const { projectId, sectionKey } = request.params as {
+      projectId: string;
+      sectionKey: ProjectSectionKey;
+    };
     const section = await this.projectService.getSection(
-      request.params.projectId,
+      projectId,
       request.auth!.userId,
-      request.params.sectionKey as ProjectSectionKey,
+      sectionKey,
     );
     response.status(StatusCodes.OK).json(successResponse(section));
   }
 
   public async updateSection(request: Request, response: Response): Promise<void> {
+    const { projectId, sectionKey } = request.params as {
+      projectId: string;
+      sectionKey: ProjectSectionKey;
+    };
     const result = await this.projectService.updateSection({
       ownerId: request.auth!.userId,
-      projectId: request.params.projectId,
-      sectionKey: request.params.sectionKey as ProjectSectionKey,
+      projectId,
+      sectionKey,
       ...request.body,
     });
     response.status(StatusCodes.OK).json(successResponse(result));

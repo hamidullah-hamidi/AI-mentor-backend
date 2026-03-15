@@ -1,8 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { Prisma } from "@prisma/client";
 import { AppError } from "../errors/app-error";
 import type { AppLogger } from "../logging/logger";
+
+const isPrismaKnownRequestError = (
+  error: unknown,
+): error is Error & { code: string } =>
+  error instanceof Error && error.name === "PrismaClientKnownRequestError";
 
 export const createErrorHandler =
   (logger: AppLogger) =>
@@ -25,7 +29,7 @@ export const createErrorHandler =
       return;
     }
 
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (isPrismaKnownRequestError(error)) {
       logger.error({ err: error }, "Database operation failed.");
       response.status(StatusCodes.BAD_REQUEST).json({
         success: false,

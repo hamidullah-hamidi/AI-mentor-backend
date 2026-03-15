@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import argon2 from "argon2";
 import { CASE_REPORT_SECTION_DEFINITIONS } from "../src/shared/constants/sections";
 import { env } from "../src/shared/config/env";
+import type { ProjectSectionKey } from "../src/modules/projects/domain/project";
 
 const prisma = new PrismaClient();
 
@@ -320,7 +321,7 @@ async function main() {
     },
   });
 
-  const seededSectionContent: Partial<Record<(typeof CASE_REPORT_SECTION_DEFINITIONS)[number]["key"], string>> = {
+  const seededSectionContent: Partial<Record<ProjectSectionKey, string>> = {
     TITLE: "A rare neurovascular presentation after delayed diagnosis",
     ABSTRACT:
       "This case report describes a rare neurovascular presentation with delayed diagnosis, highlighting key diagnostic reasoning and care lessons.",
@@ -335,7 +336,7 @@ async function main() {
   };
 
   for (const section of sections) {
-    const content = seededSectionContent[section.key] ?? "";
+    const content = seededSectionContent[section.key as ProjectSectionKey] ?? "";
     await prisma.projectSection.update({
       where: { id: section.id },
       data: {
@@ -366,7 +367,9 @@ async function main() {
     }
   }
 
-  const discussionSection = sections.find((section) => section.key === "DISCUSSION");
+  const discussionSection = sections.find(
+    (section: { key: ProjectSectionKey }) => section.key === "DISCUSSION",
+  );
   if (discussionSection) {
     const existingReview = await prisma.reviewRun.findFirst({
       where: {

@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
 import { CASE_REPORT_SECTION_DEFINITIONS } from "../../../shared/constants/sections";
 import type { Project, ProjectSection, SectionVersion } from "../domain/project";
 import type {
@@ -79,7 +79,7 @@ export class PrismaProjectRepository implements ProjectRepository {
   public constructor(private readonly prisma: PrismaClient) {}
 
   public async createProject(input: CreateProjectInput): Promise<Project> {
-    const project = await this.prisma.$transaction(async (transaction) => {
+    const project = await this.prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       const createdProject = await transaction.project.create({
         data: {
           ownerId: input.ownerId,
@@ -196,7 +196,7 @@ export class PrismaProjectRepository implements ProjectRepository {
     section: ProjectSection;
     version: SectionVersion;
   }> {
-    const result = await this.prisma.$transaction(async (transaction) => {
+    const result = await this.prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
       const section = await transaction.projectSection.findFirst({
         where: {
           key: input.sectionKey,
