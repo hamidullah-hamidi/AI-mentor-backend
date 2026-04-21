@@ -1,7 +1,10 @@
 import { StatusCodes } from "http-status-codes";
-import { env } from "../../../shared/config/env";
 import { AppError } from "../../../shared/errors/app-error";
-import type { BillingOverview } from "../domain/billing";
+import {
+  OPERATION_CONFIG,
+  type AiOperation,
+  type BillingOverview,
+} from "../domain/billing";
 import type { BillingRepository } from "../domain/billing.repository";
 
 export class BillingService {
@@ -11,24 +14,30 @@ export class BillingService {
     return this.billingRepository.getBillingOverview(userId);
   }
 
-  public async assertCanAffordReview(userId: string): Promise<void> {
+  public async assertCanAfford(
+    userId: string,
+    operation: AiOperation,
+  ): Promise<void> {
+    const { cost, label, source } = OPERATION_CONFIG[operation];
     const balance = await this.billingRepository.getWalletBalance(userId);
-    if (balance < env.APP_REVIEW_CREDIT_COST) {
+    if (balance < cost) {
       throw new AppError(
-        "Not enough application credits to run an AI review.",
+        `Not enough application credits to run an AI ${label}.`,
         StatusCodes.PAYMENT_REQUIRED,
         "INSUFFICIENT_CREDITS",
         {
-          requiredCredits: env.APP_REVIEW_CREDIT_COST,
+          requiredCredits: cost,
           balance,
         },
       );
     }
   }
 
-  public async recordSuccessfulReviewUsage(input: {
+  public async recordSuccess(input: {
     userId: string;
-    reviewRunId: string;
+    reviewRunId?: string;
+    paraphraseRunId?: string;
+    operation: AiOperation;
     projectId: string;
     model: string;
     usage: {
@@ -37,15 +46,18 @@ export class BillingService {
       totalTokens: number;
     };
   }): Promise<number> {
-    return this.billingRepository.deductCreditsForReview({
+    const { cost } = OPERATION_CONFIG[input.operation];
+    return this.billingRepository.deductAiCredits({
       ...input,
-      amount: env.APP_REVIEW_CREDIT_COST,
+      amount: cost,
     });
   }
 
-  public async recordFailedReviewUsage(input: {
+  public async recordFailed(input: {
     userId: string;
-    reviewRunId: string;
+    reviewRunId?: string;
+    paraphraseRunId?: string;
+    operation: AiOperation;
     projectId: string;
     model: string;
   }): Promise<void> {
