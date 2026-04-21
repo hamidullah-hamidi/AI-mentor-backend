@@ -290,7 +290,6 @@ export class PrismaBillingRepository implements BillingRepository {
 
   public async recordFailedUsage(input: {
     userId: string;
-    runId: string;
     projectId: string;
     reviewRunId?: string;
     paraphraseRunId?: string;
