@@ -1,5 +1,4 @@
 import { StatusCodes } from "http-status-codes";
-import { REQUIRED_SECTION_KEYS } from "../../../shared/constants/sections";
 import { env } from "../../../shared/config/env";
 import { AppError } from "../../../shared/errors/app-error";
 import type { BillingService } from "../../billing/application/billing.service";
@@ -192,8 +191,8 @@ export class ReviewService {
       }),
     );
 
-    const requiredSections = (project.sections ?? []).filter((section) =>
-      REQUIRED_SECTION_KEYS.includes(section.key),
+    const requiredSections = (project.sections ?? []).filter(
+      (section) => section.isOptional === false,
     );
     const completedRequiredSections = requiredSections.filter(
       (section) => section.content.trim().length > 0,

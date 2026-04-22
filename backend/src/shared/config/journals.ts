@@ -114,7 +114,7 @@ export const ELSEVIER_SCARE_JOURNAL: JournalDefinition = {
       key: "ARTIFICIAL_INTELLIGENCE",
       title: "Artificial Intelligence (AI)",
       order: 5,
-      optional: true,
+      optional: false,
       checklistItems: [
         {
           code: "5",
@@ -385,7 +385,7 @@ export const ELSEVIER_SCARE_JOURNAL: JournalDefinition = {
       key: "PATIENT_PERSPECTIVE",
       title: "Patient Perspective",
       order: 16,
-      optional: true,
+      optional: false,
       checklistItems: [
         {
           code: "16",
@@ -424,7 +424,7 @@ export const ELSEVIER_SCARE_JOURNAL: JournalDefinition = {
       key: "CLINICAL_IMAGES_AND_VIDEOS",
       title: "Clinical Images and Videos",
       order: 19,
-      optional: true,
+      optional: false,
       checklistItems: [
         {
           code: "19",
