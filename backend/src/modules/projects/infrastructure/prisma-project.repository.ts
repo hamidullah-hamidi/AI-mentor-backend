@@ -1,27 +1,35 @@
 import { PrismaClient, type Prisma } from "@prisma/client";
-import { CASE_REPORT_SECTION_DEFINITIONS } from "../../../shared/constants/sections";
-import type { Project, ProjectSection, SectionVersion } from "../domain/project";
+
+import type {
+  Project,
+  ProjectSection,
+  SectionVersion,
+} from "../domain/project";
 import type {
   CreateProjectInput,
   ProjectRepository,
   UpdateProjectInput,
   UpdateSectionInput,
 } from "../domain/project.repository";
+import { JOURNALS } from "src/shared/config/journals.js";
 
-const mapSection = (
-  section: {
-    id: string;
-    projectId: string;
-    key: ProjectSection["key"];
-    title: string;
-    content: string;
-    sectionOrder: number;
-    isOptional: boolean;
-    status: ProjectSection["status"];
-    lastEditedAt: Date | null;
-    updatedAt: Date;
-  },
-): ProjectSection => ({
+const DEFAULT_JOURNAL_CODE =
+  JOURNALS.find((j) => j.isDefault === true)?.code ??
+  JOURNALS[0]?.code ??
+  "unknown";
+
+const mapSection = (section: {
+  id: string;
+  projectId: string;
+  key: ProjectSection["key"];
+  title: string;
+  content: string;
+  sectionOrder: number;
+  isOptional: boolean;
+  status: ProjectSection["status"];
+  lastEditedAt: Date | null;
+  updatedAt: Date;
+}): ProjectSection => ({
   id: section.id,
   projectId: section.projectId,
   key: section.key,
@@ -34,35 +42,35 @@ const mapSection = (
   updatedAt: section.updatedAt,
 });
 
-const mapProject = (
-  project: {
+const mapProject = (project: {
+  id: string;
+  ownerId: string;
+  manuscriptType: "CASE_REPORT";
+  title: string;
+  status: Project["status"];
+  targetJournal: string | null;
+  journalCode: string | null;
+  metadata: unknown;
+  readinessScore: number | null;
+  lastReviewedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  sections?: Array<{
     id: string;
-    ownerId: string;
-    manuscriptType: "CASE_REPORT";
+    projectId: string;
+    key: ProjectSection["key"];
     title: string;
-    status: Project["status"];
-    targetJournal: string | null;
-    metadata: unknown;
-    readinessScore: number | null;
-    lastReviewedAt: Date | null;
-    createdAt: Date;
+    content: string;
+    sectionOrder: number;
+    isOptional: boolean;
+    status: ProjectSection["status"];
+    lastEditedAt: Date | null;
     updatedAt: Date;
-    sections?: Array<{
-      id: string;
-      projectId: string;
-      key: ProjectSection["key"];
-      title: string;
-      content: string;
-      sectionOrder: number;
-      isOptional: boolean;
-      status: ProjectSection["status"];
-      lastEditedAt: Date | null;
-      updatedAt: Date;
-    }>;
-  },
-): Project => ({
+  }>;
+}): Project => ({
   id: project.id,
   ownerId: project.ownerId,
+  journalCode: project.journalCode ?? DEFAULT_JOURNAL_CODE,
   manuscriptType: project.manuscriptType,
   title: project.title,
   status: project.status,
@@ -79,39 +87,51 @@ export class PrismaProjectRepository implements ProjectRepository {
   public constructor(private readonly prisma: PrismaClient) {}
 
   public async createProject(input: CreateProjectInput): Promise<Project> {
-    const project = await this.prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
-      const createdProject = await transaction.project.create({
-        data: {
-          ownerId: input.ownerId,
-          title: input.title,
-          targetJournal: input.targetJournal,
-          metadata: input.metadata,
-        },
-      });
+    const selectedJournal = input.journalCode
+      ? JOURNALS.find((j) => j.code === input.journalCode)
+      : (JOURNALS.find((j) => j.isDefault === true) ?? JOURNALS[0]);
 
-      await transaction.projectSection.createMany({
-        data: CASE_REPORT_SECTION_DEFINITIONS.map((section) => ({
-          projectId: createdProject.id,
-          key: section.key,
-          title: section.title,
-          sectionOrder: section.order,
-          isOptional: section.optional,
-        })),
-      });
+    if (!selectedJournal) {
+      throw new Error("Journal not found");
+    }
 
-      return transaction.project.findUniqueOrThrow({
-        where: {
-          id: createdProject.id,
-        },
-        include: {
-          sections: {
-            orderBy: {
-              sectionOrder: "asc",
+    const project = await this.prisma.$transaction(
+      async (transaction: Prisma.TransactionClient) => {
+        const createdProject = await transaction.project.create({
+          data: {
+            ownerId: input.ownerId,
+            title: input.title,
+            targetJournal: input.targetJournal ?? selectedJournal.name,
+            journalCode: selectedJournal.code,
+            metadata: input.metadata as Prisma.InputJsonValue | undefined,
+            journalId: null,
+          },
+        });
+
+        await transaction.projectSection.createMany({
+          data: selectedJournal.sections.map((section) => ({
+            projectId: createdProject.id,
+            key: section.key,
+            title: section.title,
+            sectionOrder: section.order,
+            isOptional: section.optional,
+          })),
+        });
+
+        return transaction.project.findUniqueOrThrow({
+          where: {
+            id: createdProject.id,
+          },
+          include: {
+            sections: {
+              orderBy: {
+                sectionOrder: "asc",
+              },
             },
           },
-        },
-      });
-    });
+        });
+      },
+    );
 
     return mapProject(project);
   }
@@ -137,7 +157,10 @@ export class PrismaProjectRepository implements ProjectRepository {
     return projects.map(mapProject);
   }
 
-  public async findProjectByIdForOwner(projectId: string, ownerId: string): Promise<Project | null> {
+  public async findProjectByIdForOwner(
+    projectId: string,
+    ownerId: string,
+  ): Promise<Project | null> {
     const project = await this.prisma.project.findFirst({
       where: {
         id: projectId,
@@ -179,7 +202,10 @@ export class PrismaProjectRepository implements ProjectRepository {
     return mapProject(project);
   }
 
-  public async archiveProject(projectId: string, ownerId: string): Promise<void> {
+  public async archiveProject(
+    projectId: string,
+    ownerId: string,
+  ): Promise<void> {
     await this.prisma.project.updateMany({
       where: {
         id: projectId,
@@ -196,77 +222,81 @@ export class PrismaProjectRepository implements ProjectRepository {
     section: ProjectSection;
     version: SectionVersion;
   }> {
-    const result = await this.prisma.$transaction(async (transaction: Prisma.TransactionClient) => {
-      const section = await transaction.projectSection.findFirst({
-        where: {
-          key: input.sectionKey,
-          projectId: input.projectId,
-          project: {
-            ownerId: input.ownerId,
-            deletedAt: null,
+    const result = await this.prisma.$transaction(
+      async (transaction: Prisma.TransactionClient) => {
+        const section = await transaction.projectSection.findFirst({
+          where: {
+            key: input.sectionKey,
+            projectId: input.projectId,
+            project: {
+              ownerId: input.ownerId,
+              deletedAt: null,
+            },
           },
-        },
-      });
+        });
 
-      if (!section) {
-        return null;
-      }
+        if (!section) {
+          return null;
+        }
 
-      const latestVersion = await transaction.sectionVersion.findFirst({
-        where: {
-          sectionId: section.id,
-        },
-        orderBy: {
-          versionNumber: "desc",
-        },
-      });
+        const latestVersion = await transaction.sectionVersion.findFirst({
+          where: {
+            sectionId: section.id,
+          },
+          orderBy: {
+            versionNumber: "desc",
+          },
+        });
 
-      const version = await transaction.sectionVersion.create({
-        data: {
-          sectionId: section.id,
-          versionNumber: (latestVersion?.versionNumber ?? 0) + 1,
-          content: input.content,
-          changeSummary: input.changeSummary,
-          editedById: input.ownerId,
-        },
-      });
+        const version = await transaction.sectionVersion.create({
+          data: {
+            sectionId: section.id,
+            versionNumber: (latestVersion?.versionNumber ?? 0) + 1,
+            content: input.content,
+            changeSummary: input.changeSummary,
+            editedById: input.ownerId,
+          },
+        });
 
-      const updatedSection = await transaction.projectSection.update({
-        where: {
-          id: section.id,
-        },
-        data: {
-          content: input.content,
-          status: input.content.trim().length > 0 ? "DRAFT" : "NOT_STARTED",
-          lastEditedAt: new Date(),
-        },
-      });
+        const updatedSection = await transaction.projectSection.update({
+          where: {
+            id: section.id,
+          },
+          data: {
+            content: input.content,
+            status: input.content.trim().length > 0 ? "DRAFT" : "NOT_STARTED",
+            lastEditedAt: new Date(),
+          },
+        });
 
-      await transaction.project.update({
-        where: {
-          id: input.projectId,
-        },
-        data: {
-          updatedAt: new Date(),
-        },
-      });
+        await transaction.project.update({
+          where: {
+            id: input.projectId,
+          },
+          data: {
+            updatedAt: new Date(),
+          },
+        });
 
-      return {
-        section: mapSection(updatedSection),
-        version: {
-          id: version.id,
-          sectionId: version.sectionId,
-          versionNumber: version.versionNumber,
-          content: version.content,
-          changeSummary: version.changeSummary,
-          editedById: version.editedById,
-          createdAt: version.createdAt,
-        },
-      };
-    });
+        return {
+          section: mapSection(updatedSection),
+          version: {
+            id: version.id,
+            sectionId: version.sectionId,
+            versionNumber: version.versionNumber,
+            content: version.content,
+            changeSummary: version.changeSummary,
+            editedById: version.editedById,
+            createdAt: version.createdAt,
+          },
+        };
+      },
+    );
 
     if (!result) {
-      throw new Error("Section update failed because the section does not exist.");
+      throw new Error(
+        "Section update failed because the section does not exist.",
+      );
     }
 
     return result;
