@@ -55,16 +55,24 @@ export const openApiSpec = {
             type: "string",
             enum: [
               "TITLE",
-              "ABSTRACT",
               "KEYWORDS",
+              "HIGHLIGHTS",
+              "ABSTRACT",
+              "ARTIFICIAL_INTELLIGENCE",
               "INTRODUCTION",
-              "CASE_PRESENTATION",
+              "GUIDELINE_CITATION",
+              "TIMELINE",
+              "PATIENT_INFORMATION",
+              "CLINICAL_FINDINGS",
+              "DIAGNOSTIC_ASSESSMENT_AND_INTERPRETATION",
+              "INTERVENTION",
+              "FOLLOW_UP_AND_OUTCOMES",
               "DISCUSSION",
-              "CONCLUSION",
+              "STRENGTHS_AND_LIMITATIONS",
               "PATIENT_PERSPECTIVE",
               "INFORMED_CONSENT",
-              "REFERENCES",
-              "COVER_LETTER",
+              "ADDITIONAL_INFORMATION",
+              "CLINICAL_IMAGES_AND_VIDEOS",
             ],
           },
         },
@@ -174,21 +182,42 @@ export const openApiSpec = {
     "/projects/{projectId}": {
       get: {
         summary: "Get a project with sections",
-        parameters: [{ in: "path", name: "projectId", required: true, schema: { type: "string" } }],
+        parameters: [
+          {
+            in: "path",
+            name: "projectId",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
         responses: {
           "200": { description: "Project detail" },
         },
       },
       patch: {
         summary: "Update project metadata or status",
-        parameters: [{ in: "path", name: "projectId", required: true, schema: { type: "string" } }],
+        parameters: [
+          {
+            in: "path",
+            name: "projectId",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
         responses: {
           "200": { description: "Project updated" },
         },
       },
       delete: {
         summary: "Archive a project",
-        parameters: [{ in: "path", name: "projectId", required: true, schema: { type: "string" } }],
+        parameters: [
+          {
+            in: "path",
+            name: "projectId",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
         responses: {
           "200": { description: "Project archived" },
         },
@@ -198,8 +227,18 @@ export const openApiSpec = {
       get: {
         summary: "Get a project section",
         parameters: [
-          { in: "path", name: "projectId", required: true, schema: { type: "string" } },
-          { in: "path", name: "sectionKey", required: true, schema: { type: "string" } },
+          {
+            in: "path",
+            name: "projectId",
+            required: true,
+            schema: { type: "string" },
+          },
+          {
+            in: "path",
+            name: "sectionKey",
+            required: true,
+            schema: { type: "string" },
+          },
         ],
         responses: {
           "200": { description: "Section detail" },
@@ -208,8 +247,18 @@ export const openApiSpec = {
       put: {
         summary: "Update section content and create a version",
         parameters: [
-          { in: "path", name: "projectId", required: true, schema: { type: "string" } },
-          { in: "path", name: "sectionKey", required: true, schema: { type: "string" } },
+          {
+            in: "path",
+            name: "projectId",
+            required: true,
+            schema: { type: "string" },
+          },
+          {
+            in: "path",
+            name: "sectionKey",
+            required: true,
+            schema: { type: "string" },
+          },
         ],
         requestBody: {
           required: true,
@@ -227,14 +276,28 @@ export const openApiSpec = {
     "/projects/{projectId}/reviews": {
       get: {
         summary: "List reviews for a project",
-        parameters: [{ in: "path", name: "projectId", required: true, schema: { type: "string" } }],
+        parameters: [
+          {
+            in: "path",
+            name: "projectId",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
         responses: {
           "200": { description: "Review history" },
         },
       },
       post: {
         summary: "Trigger AI review for a section",
-        parameters: [{ in: "path", name: "projectId", required: true, schema: { type: "string" } }],
+        parameters: [
+          {
+            in: "path",
+            name: "projectId",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
         requestBody: {
           required: true,
           content: {
@@ -252,7 +315,14 @@ export const openApiSpec = {
     "/projects/{projectId}/issues": {
       get: {
         summary: "List issues for a project",
-        parameters: [{ in: "path", name: "projectId", required: true, schema: { type: "string" } }],
+        parameters: [
+          {
+            in: "path",
+            name: "projectId",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
         responses: {
           "200": { description: "Project issues" },
         },
@@ -261,7 +331,14 @@ export const openApiSpec = {
     "/projects/{projectId}/readiness": {
       get: {
         summary: "Get the latest readiness snapshot",
-        parameters: [{ in: "path", name: "projectId", required: true, schema: { type: "string" } }],
+        parameters: [
+          {
+            in: "path",
+            name: "projectId",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
         responses: {
           "200": { description: "Readiness summary" },
         },
@@ -270,7 +347,14 @@ export const openApiSpec = {
     "/reviews/{reviewRunId}": {
       get: {
         summary: "Get a review run in detail",
-        parameters: [{ in: "path", name: "reviewRunId", required: true, schema: { type: "string" } }],
+        parameters: [
+          {
+            in: "path",
+            name: "reviewRunId",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
         responses: {
           "200": { description: "Review detail" },
         },
@@ -279,7 +363,14 @@ export const openApiSpec = {
     "/issues/{issueId}": {
       patch: {
         summary: "Update issue status",
-        parameters: [{ in: "path", name: "issueId", required: true, schema: { type: "string" } }],
+        parameters: [
+          {
+            in: "path",
+            name: "issueId",
+            required: true,
+            schema: { type: "string" },
+          },
+        ],
         requestBody: {
           required: true,
           content: {
