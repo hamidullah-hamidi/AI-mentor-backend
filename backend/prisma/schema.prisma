@@ -35,6 +35,7 @@ model Journal {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   projects        Project[]
+  isDefault       Boolean        @default(false)
 
   @@map("journals")
 }
@@ -218,9 +219,11 @@ model Project {
   aiUsageLogs        AiUsageLog[]
   journal            Journal?            @relation(fields: [journalId], references: [id])
   journalId          String?
+  journalCode        String?
 
   @@index([ownerId, updatedAt])
   @@index([status])
+  @@index([journalId])
 }
 
 model ProjectSection {
