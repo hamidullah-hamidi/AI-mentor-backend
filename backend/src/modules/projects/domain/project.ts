@@ -1,22 +1,40 @@
-export const projectStatuses = ["DRAFT", "IN_REVIEW", "READY", "ARCHIVED"] as const;
+export const projectStatuses = [
+  "DRAFT",
+  "IN_REVIEW",
+  "READY",
+  "ARCHIVED",
+] as const;
 export type ProjectStatus = (typeof projectStatuses)[number];
 export type ManuscriptType = "CASE_REPORT";
 
-export const sectionStatuses = ["NOT_STARTED", "DRAFT", "IN_REVIEW", "READY"] as const;
+export const sectionStatuses = [
+  "NOT_STARTED",
+  "DRAFT",
+  "IN_REVIEW",
+  "READY",
+] as const;
 export type SectionStatus = (typeof sectionStatuses)[number];
 
 export const projectSectionKeys = [
   "TITLE",
-  "ABSTRACT",
   "KEYWORDS",
+  "HIGHLIGHTS",
+  "ABSTRACT",
+  "ARTIFICIAL_INTELLIGENCE",
   "INTRODUCTION",
-  "CASE_PRESENTATION",
+  "GUIDELINE_CITATION",
+  "TIMELINE",
+  "PATIENT_INFORMATION",
+  "CLINICAL_FINDINGS",
+  "DIAGNOSTIC_ASSESSMENT_AND_INTERPRETATION",
+  "INTERVENTION",
+  "FOLLOW_UP_AND_OUTCOMES",
   "DISCUSSION",
-  "CONCLUSION",
+  "STRENGTHS_AND_LIMITATIONS",
   "PATIENT_PERSPECTIVE",
   "INFORMED_CONSENT",
-  "REFERENCES",
-  "COVER_LETTER",
+  "ADDITIONAL_INFORMATION",
+  "CLINICAL_IMAGES_AND_VIDEOS",
 ] as const;
 
 export type ProjectSectionKey = (typeof projectSectionKeys)[number];
