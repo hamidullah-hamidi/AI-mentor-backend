@@ -45,7 +45,7 @@ model Journal {
 model JournalSectionTemplate {
   id             String                 @id @default(cuid())
   journalId      String
-  key            ProjectSectionKey
+  key            String
   title          String
   sectionOrder   Int
   isOptional     Boolean                @default(false)
@@ -71,27 +71,7 @@ model JournalChecklistItem {
   @@index([sectionId])
 }
 
-enum ProjectSectionKey {
-  TITLE
-  KEYWORDS
-  HIGHLIGHTS
-  ABSTRACT
-  ARTIFICIAL_INTELLIGENCE
-  INTRODUCTION
-  GUIDELINE_CITATION
-  TIMELINE
-  PATIENT_INFORMATION
-  CLINICAL_FINDINGS
-  DIAGNOSTIC_ASSESSMENT_AND_INTERPRETATION
-  INTERVENTION
-  FOLLOW_UP_AND_OUTCOMES
-  DISCUSSION
-  STRENGTHS_AND_LIMITATIONS
-  PATIENT_PERSPECTIVE
-  INFORMED_CONSENT
-  ADDITIONAL_INFORMATION
-  CLINICAL_IMAGES_AND_VIDEOS
-}
+
 
 enum SectionStatus {
   NOT_STARTED
@@ -259,7 +239,7 @@ model Project {
 model ProjectSection {
   id           String            @id @default(cuid())
   projectId    String
-  key          ProjectSectionKey
+  key          String
   title        String
   content      String            @default("")
   sectionOrder Int
