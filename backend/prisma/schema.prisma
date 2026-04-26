@@ -31,7 +31,7 @@ model Journal {
   description     String?
   manuscriptType  ManuscriptType @default(CASE_REPORT)
   guidelinePackId String?
-  guidelinePack   GuidelinePack? @relation(fields: [guidelinePackId], references: [id], onDelete: Cascade)
+  guidelinePack   GuidelinePack? @relation(fields: [guidelinePackId], references: [id], onDelete: SetNull)
   isDefault       Boolean        @default(false)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
@@ -384,6 +384,7 @@ model GuidelinePack {
   updatedAt      DateTime            @updatedAt
   archivedAt     DateTime?
   reviewRuns     ReviewRun[]
+  journals       Journal[]
 
   @@index([status, isDefault])
 }
