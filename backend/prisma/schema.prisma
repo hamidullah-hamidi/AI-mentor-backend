@@ -44,15 +44,15 @@ model Journal {
 }
 
 model JournalSectionTemplate {
-  id             String                 @id @default(cuid())
-  journalId      String
-  key            String
-  title          String
-  sectionOrder   Int
-  isOptional     Boolean                @default(false)
-  description    String? 
-  createdAt      DateTime               @default(now())
-  updatedAt      DateTime               @updatedAt
+  id           String   @id @default(cuid())
+  journalId    String
+  key          String
+  title        String
+  sectionOrder Int
+  isOptional   Boolean  @default(false)
+  description  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   journal Journal @relation(fields: [journalId], references: [id], onDelete: Cascade)
 
@@ -60,8 +60,6 @@ model JournalSectionTemplate {
   @@index([journalId, sectionOrder])
   @@map("journal_section_templates")
 }
-
-
 
 enum SectionStatus {
   NOT_STARTED
@@ -227,18 +225,18 @@ model Project {
 }
 
 model ProjectSection {
-  id           String            @id @default(cuid())
+  id           String           @id @default(cuid())
   projectId    String
   key          String
   title        String
-  content      String            @default("")
+  content      String           @default("")
   sectionOrder Int
-  isOptional   Boolean           @default(false)
-  status       SectionStatus     @default(NOT_STARTED)
+  isOptional   Boolean          @default(false)
+  status       SectionStatus    @default(NOT_STARTED)
   lastEditedAt DateTime?
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  project      Project           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  project      Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   versions     SectionVersion[]
   reviewRuns   ReviewRun[]
   issues       ReviewIssue[]
