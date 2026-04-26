@@ -2,7 +2,9 @@ import { PrismaClient } from "@prisma/client";
 import argon2 from "argon2";
 import { env } from "../src/shared/config/env";
 import { type ProjectSectionKey } from "../src/modules/projects/domain/project";
-import { ELSEVIER_SCARE_JOURNAL } from "src/shared/seed-data/journals.js";
+import { ELSEVIER_SCARE_JOURNAL } from "../src/shared/seed-data/journals";
+
+const j = ELSEVIER_SCARE_JOURNAL;
 
 const prisma = new PrismaClient();
 
@@ -36,48 +38,6 @@ async function upsertUser(input: {
 }
 
 async function main() {
-  const j = ELSEVIER_SCARE_JOURNAL;
-
-  // 1. create journal
-  const journal = await prisma.journal.upsert({
-    where: { code: j.code },
-    update: {
-      name: j.name,
-      publisher: j.publisher,
-      description: j.description,
-      manuscriptType: j.manuscriptType,
-      isDefault: j.isDefault,
-      guidelinePack: j.guidelinePack,
-    },
-    create: {
-      code: j.code,
-      name: j.name,
-      publisher: j.publisher,
-      description: j.description,
-      manuscriptType: j.manuscriptType,
-      isDefault: j.isDefault,
-      guidelinePack: j.guidelinePack,
-    },
-  });
-
-  // 2. delete old templates + checklist
-  await prisma.journalSectionTemplate.deleteMany({
-    where: { journalId: journal.id },
-  });
-
-  // 3. create sections
-  for (const section of j.sections) {
-    const createdSection = await prisma.journalSectionTemplate.create({
-      data: {
-        journalId: journal.id,
-        key: section.key,
-        title: section.title,
-        sectionOrder: section.order,
-        isOptional: section.optional,
-      },
-    });
-  }
-
   const [freePlan, standardPlan, premiumPlan, creditPackPlan] =
     await Promise.all([
       prisma.subscriptionPlan.upsert({
@@ -224,38 +184,22 @@ async function main() {
   });
 
   const guidelinePack = await prisma.guidelinePack.upsert({
-    where: { code: "care-case-report-v1" },
+    where: { code: j.code },
     update: {
       name: "CARE-like Case Report Guidance",
       version: "1.0.0",
       description: "Baseline case report completeness and safety rules.",
       status: "ACTIVE",
-      rules: {
-        mustCheck: [
-          "Clear case novelty",
-          "Complete patient timeline",
-          "Informed consent statement",
-          "No fabricated citations",
-          "Explicit missing data warnings",
-        ],
-      },
+      rules: j.guidelinePack,
       isDefault: true,
     },
     create: {
       name: "CARE-like Case Report Guidance",
-      code: "care-case-report-v1",
+      code: j.code,
       version: "1.0.0",
       description: "Baseline case report completeness and safety rules.",
       status: "ACTIVE",
-      rules: {
-        mustCheck: [
-          "Clear case novelty",
-          "Complete patient timeline",
-          "Informed consent statement",
-          "No fabricated citations",
-          "Explicit missing data warnings",
-        ],
-      },
+      rules: j.guidelinePack,
       isDefault: true,
     },
   });
@@ -308,6 +252,51 @@ async function main() {
       },
     },
   });
+
+  //  create journal
+  const journal = await prisma.journal.upsert({
+    where: { code: j.code },
+    update: {
+      name: j.name,
+      publisher: j.publisher,
+      description: j.description,
+      manuscriptType: j.manuscriptType,
+      isDefault: j.isDefault,
+      guidelinePack: {
+        connect: { id: guidelinePack.id },
+      },
+    },
+    create: {
+      code: j.code,
+      name: j.name,
+      publisher: j.publisher,
+      description: j.description,
+      manuscriptType: j.manuscriptType,
+      isDefault: j.isDefault,
+      guidelinePack: {
+        connect: { id: guidelinePack.id },
+      },
+    },
+  });
+
+  //  delete old templates
+  await prisma.journalSectionTemplate.deleteMany({
+    where: { journalId: journal.id },
+  });
+
+  // create sections
+  for (const section of j.sections) {
+    const createdSection = await prisma.journalSectionTemplate.create({
+      data: {
+        journalId: journal.id,
+        key: section.key,
+        title: section.title,
+        sectionOrder: section.order,
+        isOptional: section.optional,
+        description: section.description,
+      },
+    });
+  }
 
   const existingProject = await prisma.project.findFirst({
     where: {
@@ -440,7 +429,7 @@ async function main() {
           sectionId: discussionSection.id,
           initiatedById: testUser.id,
           promptTemplateId: promptTemplate.id,
-          guidelinePackId: guidelinePack.id,
+          guidelinePackId: journal.guidelinePackId,
           aiModel: "gpt-5-mini",
           status: "COMPLETED",
           summary:
