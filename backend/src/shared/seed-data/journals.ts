@@ -16,7 +16,7 @@ export interface JournalDefinition {
   manuscriptType: "CASE_REPORT";
   isDefault?: boolean;
   sections: JournalSectionDefinition[];
-  rules: string;
+  guidelinePack: string;
 }
 
 export const ELSEVIER_SCARE_JOURNAL: JournalDefinition = {
@@ -182,7 +182,7 @@ export const ELSEVIER_SCARE_JOURNAL: JournalDefinition = {
     },
   ],
 
-  rules: `
+  guidelinePack: `
   You are reviewing a medical case report section based on journal-specific standards.
 
   General expectations:
@@ -213,5 +213,3 @@ export const ELSEVIER_SCARE_JOURNAL: JournalDefinition = {
   - Prioritize issues that impact publication readiness and scientific quality.
   `,
 };
-
-export const JOURNALS: JournalDefinition = ELSEVIER_SCARE_JOURNAL;
