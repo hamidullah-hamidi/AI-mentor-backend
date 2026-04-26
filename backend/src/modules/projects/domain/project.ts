@@ -72,14 +72,21 @@ export interface SectionVersion {
   createdAt: Date;
 }
 
+export interface Journal {
+  guidelinePack: {
+    rules: string | null;
+  };
+}
+
 export interface Project {
   id: string;
   ownerId: string;
   journalCode: string;
+  targetJournal: string | null;
+  journal?: Journal | null;
   manuscriptType: ManuscriptType;
   title: string;
   status: ProjectStatus;
-  targetJournal: string | null;
   metadata: CaseReportMetadata | null;
   readinessScore: number | null;
   lastReviewedAt: Date | null;
