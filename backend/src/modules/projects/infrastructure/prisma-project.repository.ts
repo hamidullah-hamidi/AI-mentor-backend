@@ -110,7 +110,9 @@ export class PrismaProjectRepository implements ProjectRepository {
         });
 
         if (templates.length === 0) {
-          throw new Error(`Journal '${journal.code}' has no section templates.`);
+          throw new Error(
+            `Journal '${journal.code}' has no section templates.`,
+          );
         }
 
         const createdProject = await transaction.project.create({
@@ -190,7 +192,12 @@ export class PrismaProjectRepository implements ProjectRepository {
       },
       include: {
         journal: {
-          select: { code: true },
+          select: {
+            code: true,
+            guidelinePack: {
+              select: { rules: true },
+            },
+          },
         },
         sections: {
           orderBy: {
