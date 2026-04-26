@@ -43,7 +43,10 @@ const mapProject = (project: {
   title: string;
   status: Project["status"];
   targetJournal: string | null;
-  journal: { code: string } | null;
+  journal: {
+    code: string;
+    guidelinePack?: { rules: Record<string, unknown> | null } | null;
+  } | null;
   metadata: unknown;
   readinessScore: number | null;
   lastReviewedAt: Date | null;
@@ -65,6 +68,16 @@ const mapProject = (project: {
   id: project.id,
   ownerId: project.ownerId,
   journalCode: project.journal?.code ?? "unknown",
+  journal: project.journal
+    ? {
+        code: project.journal.code,
+        guidelinePack: project.journal.guidelinePack
+          ? {
+              rules: project.journal.guidelinePack.rules,
+            }
+          : null,
+      }
+    : null,
   manuscriptType: project.manuscriptType,
   title: project.title,
   status: project.status,

@@ -73,9 +73,10 @@ export interface SectionVersion {
 }
 
 export interface Journal {
+  code: string;
   guidelinePack: {
-    rules: string | null;
-  };
+    rules: Record<string, unknown> | null;
+  } | null;
 }
 
 export interface Project {
