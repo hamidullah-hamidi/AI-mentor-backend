@@ -154,7 +154,12 @@ export class PrismaProjectRepository implements ProjectRepository {
           },
           include: {
             journal: {
-              select: { code: true },
+              select: {
+                code: true,
+                guidelinePack: {
+                  select: { id: true, rules: true },
+                },
+              },
             },
             sections: {
               orderBy: {
@@ -208,7 +213,7 @@ export class PrismaProjectRepository implements ProjectRepository {
           select: {
             code: true,
             guidelinePack: {
-              select: { rules: true },
+              select: { id: true, rules: true },
             },
           },
         },

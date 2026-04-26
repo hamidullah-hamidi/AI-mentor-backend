@@ -50,7 +50,7 @@ model JournalSectionTemplate {
   title          String
   sectionOrder   Int
   isOptional     Boolean                @default(false)
-  description    String 
+  description    String? 
   createdAt      DateTime               @default(now())
   updatedAt      DateTime               @updatedAt
 
