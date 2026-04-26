@@ -47,7 +47,7 @@ async function main() {
       description: j.description,
       manuscriptType: j.manuscriptType,
       isDefault: j.isDefault,
-      validationRules: j.validationRules,
+      guidelinePack: j.guidelinePack,
     },
     create: {
       code: j.code,
@@ -56,7 +56,7 @@ async function main() {
       description: j.description,
       manuscriptType: j.manuscriptType,
       isDefault: j.isDefault,
-      validationRules: j.validationRules,
+      guidelinePack: j.guidelinePack,
     },
   });
 
@@ -65,7 +65,7 @@ async function main() {
     where: { journalId: journal.id },
   });
 
-  // 3. create sections + checklist items
+  // 3. create sections
   for (const section of j.sections) {
     const createdSection = await prisma.journalSectionTemplate.create({
       data: {
@@ -76,17 +76,6 @@ async function main() {
         isOptional: section.optional,
       },
     });
-
-    // checklist items
-    if (section.checklistItems?.length) {
-      await prisma.journalChecklistItem.createMany({
-        data: section.checklistItems.map((item) => ({
-          sectionId: createdSection.id,
-          code: item.code,
-          description: item.description,
-        })),
-      });
-    }
   }
 
   const [freePlan, standardPlan, premiumPlan, creditPackPlan] =
@@ -644,7 +633,7 @@ async function main() {
       },
       {
         actorUserId: admin.id,
-        entityType: "GuidelinePack",
+        entityType: "guidelinePack",
         entityId: guidelinePack.id,
         action: "SEED_UPSERT",
         metadata: { source: "seed" },
