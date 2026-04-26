@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import argon2 from "argon2";
 import { env } from "../src/shared/config/env";
-import { type ProjectSectionKey } from "../src/modules/projects/domain/project";
 import { ELSEVIER_SCARE_JOURNAL } from "../src/shared/seed-data/journals";
 
 const j = ELSEVIER_SCARE_JOURNAL;
@@ -190,7 +189,7 @@ async function main() {
       version: "1.0.0",
       description: "Baseline case report completeness and safety rules.",
       status: "ACTIVE",
-      rules: j.guidelinePack,
+      rules: { text: j.guidelinePack },
       isDefault: true,
     },
     create: {
@@ -199,7 +198,7 @@ async function main() {
       version: "1.0.0",
       description: "Baseline case report completeness and safety rules.",
       status: "ACTIVE",
-      rules: j.guidelinePack,
+      rules: { text: j.guidelinePack },
       isDefault: true,
     },
   });
@@ -366,7 +365,7 @@ async function main() {
     },
   });
 
-  const seededSectionContent: Partial<Record<ProjectSectionKey, string>> = {
+  const seededSectionContent: Record<string, string> = {
     TITLE: "A rare neurovascular presentation after delayed diagnosis",
     ABSTRACT:
       "This case report describes a rare neurovascular presentation with delayed diagnosis, highlighting key diagnostic reasoning and care lessons.",
@@ -379,8 +378,7 @@ async function main() {
   };
 
   for (const section of sections) {
-    const content =
-      seededSectionContent[section.key as ProjectSectionKey] ?? "";
+    const content = seededSectionContent[section.key] ?? "";
     await prisma.projectSection.update({
       where: { id: section.id },
       data: {
@@ -411,9 +409,7 @@ async function main() {
     }
   }
 
-  const discussionSection = sections.find(
-    (section: { key: ProjectSectionKey }) => section.key === "DISCUSSION",
-  );
+  const discussionSection = sections.find((section) => section.key === "DISCUSSION");
   if (discussionSection) {
     const existingReview = await prisma.reviewRun.findFirst({
       where: {

@@ -45,7 +45,10 @@ const mapProject = (project: {
   targetJournal: string | null;
   journal: {
     code: string;
-    guidelinePack?: { rules: Record<string, unknown> | null } | null;
+    guidelinePack?: {
+      id: string;
+      rules: Prisma.JsonValue | null;
+    } | null;
   } | null;
   metadata: unknown;
   readinessScore: number | null;
@@ -73,6 +76,7 @@ const mapProject = (project: {
         code: project.journal.code,
         guidelinePack: project.journal.guidelinePack
           ? {
+              id: project.journal.guidelinePack.id,
               rules: project.journal.guidelinePack.rules,
             }
           : null,
@@ -182,7 +186,12 @@ export class PrismaProjectRepository implements ProjectRepository {
       },
       include: {
         journal: {
-          select: { code: true },
+          select: {
+            code: true,
+            guidelinePack: {
+              select: { id: true, rules: true },
+            },
+          },
         },
         sections: {
           orderBy: {
@@ -241,7 +250,12 @@ export class PrismaProjectRepository implements ProjectRepository {
       },
       include: {
         journal: {
-          select: { code: true },
+          select: {
+            code: true,
+            guidelinePack: {
+              select: { id: true, rules: true },
+            },
+          },
         },
         sections: {
           orderBy: {

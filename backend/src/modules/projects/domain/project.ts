@@ -1,3 +1,5 @@
+import { Prisma } from "@prisma/client";
+
 export const projectStatuses = [
   "DRAFT",
   "IN_REVIEW",
@@ -37,7 +39,7 @@ export const projectSectionKeys = [
   "CLINICAL_IMAGES_AND_VIDEOS",
 ] as const;
 
-export type ProjectSectionKey = (typeof projectSectionKeys)[number];
+export type ProjectSectionKey = string;
 
 export interface CaseReportMetadata {
   journalTarget?: string;
@@ -52,7 +54,7 @@ export interface CaseReportMetadata {
 export interface ProjectSection {
   id: string;
   projectId: string;
-  key: ProjectSectionKey;
+  key: string;
   title: string;
   content: string;
   sectionOrder: number;
@@ -75,7 +77,8 @@ export interface SectionVersion {
 export interface Journal {
   code: string;
   guidelinePack: {
-    rules: Record<string, unknown> | null;
+    id?: string;
+    rules: Prisma.JsonValue | null;
   } | null;
 }
 

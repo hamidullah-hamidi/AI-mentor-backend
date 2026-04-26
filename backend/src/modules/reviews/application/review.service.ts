@@ -3,7 +3,6 @@ import { env } from "../../../shared/config/env";
 import { AppError } from "../../../shared/errors/app-error";
 import type { BillingService } from "../../billing/application/billing.service";
 import type { ProjectService } from "../../projects/application/project.service";
-import type { ProjectSectionKey } from "../../projects/domain/project";
 import type {
   ReviewIssue,
   ReviewRun,
@@ -31,7 +30,7 @@ export class ReviewService {
   public async triggerSectionReview(input: {
     projectId: string;
     ownerId: string;
-    sectionKey: ProjectSectionKey;
+    sectionKey: string;
   }): Promise<ReviewRun> {
     const project = await this.projectService.getProject(
       input.projectId,

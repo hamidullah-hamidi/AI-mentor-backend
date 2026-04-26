@@ -1,7 +1,5 @@
-import type { ProjectSectionKey } from "../../modules/projects/domain/project";
-
 export interface JournalSectionDefinition {
-  key: ProjectSectionKey;
+  key: string;
   title: string;
   order: number;
   optional: boolean;
