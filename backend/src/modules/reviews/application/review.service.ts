@@ -78,7 +78,9 @@ export class ReviewService {
       ].join("\n");
 
     const activeGuidelinePack =
-      await this.reviewRepository.getDefaultGuidelinePack();
+      project.journal?.guidelinePack ??
+      (await this.reviewRepository.getDefaultGuidelinePack());
+
     const guidelinePack = activeGuidelinePack?.rules ?? {
       focus: [
         "CARE-like completeness",
