@@ -3,6 +3,18 @@ import type { AiOperation, BillingOverview } from "./billing";
 export interface BillingRepository {
   getBillingOverview(userId: string): Promise<BillingOverview>;
   getWalletBalance(userId: string): Promise<number>;
+  deductCreditsForReview(input: {
+    userId: string;
+    reviewRunId: string;
+    amount: number;
+    model: string;
+    projectId: string;
+    usage: {
+      inputTokens: number;
+      outputTokens: number;
+      totalTokens: number;
+    };
+  }): Promise<number>;
   deductAiCredits(input: {
     userId: string;
     reviewRunId?: string;

@@ -14,6 +14,40 @@ export class BillingService {
     return this.billingRepository.getBillingOverview(userId);
   }
 
+  public async assertCanAffordReview(
+    userId: string,
+    requiredCredits: number,
+  ): Promise<void> {
+    const balance = await this.billingRepository.getWalletBalance(userId);
+
+    if (balance < requiredCredits) {
+      throw new AppError(
+        "Not enough application credits to run an AI review.",
+        StatusCodes.PAYMENT_REQUIRED,
+        "INSUFFICIENT_CREDITS",
+        {
+          requiredCredits,
+          balance,
+        },
+      );
+    }
+  }
+
+  public async recordSuccessfulReviewUsage(input: {
+    userId: string;
+    reviewRunId: string;
+    projectId: string;
+    model: string;
+    amount: number;
+    usage: {
+      inputTokens: number;
+      outputTokens: number;
+      totalTokens: number;
+    };
+  }): Promise<number> {
+    return this.billingRepository.deductCreditsForReview(input);
+  }
+
   public async assertCanAfford(
     userId: string,
     operation: AiOperation,
@@ -40,6 +74,7 @@ export class BillingService {
     operation: AiOperation;
     projectId: string;
     model: string;
+    amount: number;
     usage: {
       inputTokens: number;
       outputTokens: number;

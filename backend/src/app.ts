@@ -38,6 +38,7 @@ import { ParaphraseService } from "./modules/paraphrasing/application/paraphrase
 import { PrismaParaphraseRepository } from "./modules/paraphrasing/infrastructure/prisma-paraphrase.repository";
 import { OpenAiSectionParaphrase } from "./modules/paraphrasing/infrastructure/openai-section-paraphrase";
 import { createParaphraseRouter } from "./modules/paraphrasing/interface/paraphrase.routes";
+import { ReviewCreditEstimatorService } from "./modules/billing/application/review-credit-estimator.service";
 
 export const createApp = (): express.Express => {
   const prisma = new PrismaClient();
@@ -58,11 +59,13 @@ export const createApp = (): express.Express => {
   );
   const projectService = new ProjectService(projectRepository);
   const billingService = new BillingService(billingRepository);
+  const reviewCreditEstimator = new ReviewCreditEstimatorService();
   const reviewService = new ReviewService(
     reviewRepository,
     projectService,
     new OpenAiSectionReviewer(),
     billingService,
+    reviewCreditEstimator,
   );
   const adminService = new AdminService(adminRepository);
   const paraphraseService = new ParaphraseService(
@@ -119,13 +122,14 @@ export const createApp = (): express.Express => {
     createBillingRouter(billingController, tokenService),
   );
   app.use(
-    `${env.API_PREFIX}/admin`,
-    createAdminRouter(adminController, tokenService),
-  );
-  app.use(
     `${env.API_PREFIX}/paraphrase`,
     createParaphraseRouter(paraphraseController, tokenService),
   );
+  app.use(
+    `${env.API_PREFIX}/admin`,
+    createAdminRouter(adminController, tokenService),
+  );
+
   app.use(createErrorHandler(logger));
   return app;
 };
