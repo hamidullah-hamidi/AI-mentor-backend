@@ -396,6 +396,7 @@ export class PrismaBillingRepository implements BillingRepository {
         userId: input.userId,
         projectId: input.projectId,
         reviewRunId: input.reviewRunId,
+        paraphraseRunId: input.paraphraseRunId,
         model: input.model,
         operation: input.operation,
         status: "FAILED",
