@@ -42,7 +42,11 @@ export class ParaphraseService {
       );
     }
 
-    const section = await this.projectService.getSectionById(input.sectionId);
+    const section = await this.projectService.getSectionById(
+      input.sectionId,
+      input.ownerId,
+      input.projectId,
+    );
     if (!section.content.trim()) {
       throw new AppError(
         "Section content is required before paraphrasing.",
@@ -96,6 +100,7 @@ export class ParaphraseService {
         projectId: input.projectId,
         model: env.OPENAI_MODEL,
         usage: execution.usage,
+        amount: execution.usage.totalTokens,
       });
 
       const completeParaphrase =
@@ -140,7 +145,7 @@ export class ParaphraseService {
     ownerId: string,
   ): Promise<ParaphraseRun[]> {
     await this.projectService.getProject(projectId, ownerId);
-    await this.projectService.getSectionById(sectionId);
+    await this.projectService.getSectionById(sectionId, ownerId, projectId);
     const paraphrase = await this.paraphraseRepository.listSectionParaphrase(
       projectId,
       sectionId,

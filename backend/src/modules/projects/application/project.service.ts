@@ -93,8 +93,16 @@ export class ProjectService {
     return section;
   }
 
-  public async getSectionById(sectionId: string): Promise<ProjectSection> {
-    const section = await this.projectRepository.findSectionById(sectionId);
+  public async getSectionById(
+    sectionId: string,
+    projectId: string,
+    ownerId: string,
+  ): Promise<ProjectSection> {
+    const section = await this.projectRepository.findSectionById(
+      sectionId,
+      projectId,
+      ownerId,
+    );
 
     if (!section) {
       throw new AppError(

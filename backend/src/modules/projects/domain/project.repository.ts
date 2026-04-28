@@ -42,5 +42,9 @@ export interface ProjectRepository {
     ownerId: string,
     sectionKey: ProjectSection["key"],
   ): Promise<ProjectSection | null>;
-  findSectionById(sectionId: string): Promise<ProjectSection | null>;
+  findSectionById(
+    sectionId: string,
+    ownerId: string,
+    projectId: string,
+  ): Promise<ProjectSection | null>;
 }
