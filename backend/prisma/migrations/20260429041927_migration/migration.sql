@@ -10,6 +10,9 @@ CREATE TYPE "paraphraseRunStatuses" AS ENUM ('QUEUED', 'PROCESSING', 'COMPLETED'
 -- AlterEnum
 ALTER TYPE "CreditTransactionSource" ADD VALUE 'AI_PARAPHRASE';
 
+-- AlterEnum
+ALTER TYPE "PromptTemplateType" ADD VALUE 'SECTION_PARAPHRASE';
+
 -- AlterTable
 ALTER TABLE "AiUsageLog" ADD COLUMN     "paraphraseRunId" TEXT;
 

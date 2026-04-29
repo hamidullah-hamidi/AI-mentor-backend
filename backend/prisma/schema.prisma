@@ -82,6 +82,7 @@ enum PromptTemplateType {
   SECTION_REVIEW
   SYSTEM_GUARDRAIL
   FOLLOW_UP
+  SECTION_PARAPHRASE
 }
 
 enum PromptTemplateStatus {
