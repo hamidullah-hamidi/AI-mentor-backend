@@ -319,7 +319,6 @@ export class PrismaProjectRepository implements ProjectRepository {
       },
     });
 
-    console.log('section', section)
     return section ? mapSection(section) : null;
   }
 }
