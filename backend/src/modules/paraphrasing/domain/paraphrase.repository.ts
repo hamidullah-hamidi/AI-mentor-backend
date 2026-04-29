@@ -38,6 +38,7 @@ export interface ParaphraseRepository {
     preservedWords?: string[];
     lengthStrategy?: LengthStrategy;
     aiModel: string;
+    promptTemplateId?: string;
   }): Promise<ParaphraseRun>;
   markParaphraseProcessing(paraphraseRunId: string): Promise<void>;
   markParaphraseFailed(
@@ -55,4 +56,8 @@ export interface ParaphraseRepository {
     ownerId: string,
   ): Promise<ParaphraseRun | null>;
   deleteParaphraseRun(paraphraseRunId: string, ownerId: string): Promise<void>;
+  getActiveParaphrasePrompt(): Promise<{
+    id: string;
+    templateText: string;
+  } | null>;
 }

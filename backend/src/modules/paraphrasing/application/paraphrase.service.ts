@@ -13,6 +13,7 @@ import { AppError } from "src/shared/errors/app-error";
 import { StatusCodes } from "http-status-codes";
 import { BillingService } from "src/modules/billing/application/billing.service";
 import { env } from "src/shared/config/env";
+import { PROMPT_TEMPLATE } from "src/shared/prompTemplate/openAiPromptTemplate";
 
 export class ParaphraseService {
   public constructor(
@@ -55,6 +56,17 @@ export class ParaphraseService {
       );
     }
 
+    const activePrompt =
+      await this.paraphraseRepository.getActiveParaphrasePrompt();
+    const promptTemplate = activePrompt?.templateText
+      ? activePrompt.templateText
+          .replace("{{tone}}", `${input.tone}`)
+          .replace("{{content}}", section.content)
+      : PROMPT_TEMPLATE.PARAPHRSE.replace("{{tone}}", `${input.tone}`).replace(
+          "{{content}}",
+          section.content,
+        );
+
     await this.billingService.assertCanAfford(input.ownerId, "PARAPHRASE");
 
     const paraphraseRun =
@@ -67,22 +79,11 @@ export class ParaphraseService {
         preservedWords: input.preservedWords,
         lengthStrategy: input.lengthStrategy,
         aiModel: env.OPENAI_MODEL,
+        promptTemplateId: activePrompt?.id,
       });
 
     await this.paraphraseRepository.markParaphraseProcessing(paraphraseRun.id);
-
     try {
-      const promptTemplate = `You are an expert publication mentor for medical case reports.
-        Task:
-        Paraphrase the text.
-        Rules:
-        - Preserve meaning
-        - Do not add new facts
-        - Do not hallucinate
-        - Tone: ${input.tone}
-        Text:
-        """${section.content}"""
-        `;
       const execution = await this.sectionParaphrase.paraphraseSection({
         projectId: input.projectId,
         sectionId: section.id,

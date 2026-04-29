@@ -101,7 +101,7 @@ export class OpenAiSectionParaphrase implements SectionParaphrase {
       ],
       response_format: zodResponseFormat(
         AiParaphraseResponseSchema,
-        "paraphrase_result",
+        "case_report_section_paraphrase",
       ),
     });
 

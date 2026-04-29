@@ -49,6 +49,7 @@ export class PrismaParaphraseRepository implements ParaphraseRepository {
     preservedWords?: string[];
     lengthStrategy?: LengthStrategy;
     aiModel: string;
+    promptTemplateId?: string;
   }): Promise<ParaphraseRun> {
     const paraphrase = await this.prisma.paraphraseRun.create({
       data: {
@@ -62,6 +63,7 @@ export class PrismaParaphraseRepository implements ParaphraseRepository {
         status: "QUEUED",
         originalText: input.originalText,
         paraphrasedText: "",
+        promptTemplateId: input.promptTemplateId,
       },
     });
     return mapParaphraseRun(paraphrase);
@@ -161,5 +163,26 @@ export class PrismaParaphraseRepository implements ParaphraseRepository {
         initiatedById: ownerId,
       },
     });
+  }
+
+  public async getActiveParaphrasePrompt(): Promise<{
+    id: string;
+    templateText: string;
+  } | null> {
+    const template = await this.prisma.promptTemplate.findFirst({
+      where: {
+        code: "case_report_section_paraphrase",
+        status: "ACTIVE",
+      },
+      orderBy: {
+        version: "desc",
+      },
+    });
+    return template
+      ? {
+          id: template.id,
+          templateText: template.templateText,
+        }
+      : null;
   }
 }
