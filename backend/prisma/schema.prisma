@@ -239,7 +239,7 @@ model Project {
 model ProjectSection {
   id             String            @id @default(cuid())
   projectId      String
-  key            ProjectSectionKey
+  key            String
   title          String
   content        String            @default("")
   sectionOrder   Int
