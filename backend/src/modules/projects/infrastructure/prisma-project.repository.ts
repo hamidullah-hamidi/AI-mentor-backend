@@ -11,6 +11,7 @@ import type {
   UpdateSectionInput,
 } from "../domain/project.repository";
 import { AppError } from "src/shared/errors/app-error.js";
+import { StatusCodes } from "http-status-codes";
 
 const mapSection = (section: {
   id: string;
@@ -106,7 +107,12 @@ export class PrismaProjectRepository implements ProjectRepository {
           where: { isDefault: true },
         });
 
-    if (!journal) throw new AppError(`Journal not found.`);
+    if (!journal)
+      throw new AppError(
+        `Journal not found.`,
+        StatusCodes.NOT_FOUND,
+        "JOURNAL_NOT_FOUND",
+      );
 
     const project = await this.prisma.$transaction(
       async (transaction: Prisma.TransactionClient) => {
@@ -120,8 +126,10 @@ export class PrismaProjectRepository implements ProjectRepository {
         });
 
         if (templates.length === 0) {
-          throw new Error(
+          throw new AppError(
             `Journal '${journal.code}' has no section templates.`,
+            StatusCodes.NOT_FOUND,
+            "JOURNAL_HAS_NO_SECTIONS",
           );
         }
 
@@ -353,8 +361,10 @@ export class PrismaProjectRepository implements ProjectRepository {
     );
 
     if (!result) {
-      throw new Error(
+      throw new AppError(
         "Section update failed because the section does not exist.",
+        StatusCodes.NOT_FOUND,
+        "SECTION_NOT_FOUND",
       );
     }
 
