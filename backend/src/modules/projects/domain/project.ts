@@ -17,30 +17,6 @@ export const sectionStatuses = [
 ] as const;
 export type SectionStatus = (typeof sectionStatuses)[number];
 
-export const projectSectionKeys = [
-  "TITLE",
-  "KEYWORDS",
-  "HIGHLIGHTS",
-  "ABSTRACT",
-  "ARTIFICIAL_INTELLIGENCE",
-  "INTRODUCTION",
-  "GUIDELINE_CITATION",
-  "TIMELINE",
-  "PATIENT_INFORMATION",
-  "CLINICAL_FINDINGS",
-  "DIAGNOSTIC_ASSESSMENT_AND_INTERPRETATION",
-  "INTERVENTION",
-  "FOLLOW_UP_AND_OUTCOMES",
-  "DISCUSSION",
-  "STRENGTHS_AND_LIMITATIONS",
-  "PATIENT_PERSPECTIVE",
-  "INFORMED_CONSENT",
-  "ADDITIONAL_INFORMATION",
-  "CLINICAL_IMAGES_AND_VIDEOS",
-] as const;
-
-export type ProjectSectionKey = string;
-
 export interface CaseReportMetadata {
   journalTarget?: string;
   specialty?: string;
