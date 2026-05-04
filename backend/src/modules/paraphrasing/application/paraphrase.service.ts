@@ -59,7 +59,7 @@ export class ParaphraseService {
 
     const activePrompt =
       await this.paraphraseRepository.getActiveParaphrasePrompt();
-    const toneText = `${input.tone} — ${toneTypeDescriptions[input.tone]}`;
+    const toneText = `${toneTypeDescriptions[input.tone]}`;
     const promptTemplate = activePrompt?.templateText
       ? activePrompt.templateText
           .replace("{{tone}}", toneText)

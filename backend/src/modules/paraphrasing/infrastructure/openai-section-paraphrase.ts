@@ -76,8 +76,8 @@ export class OpenAiSectionParaphrase implements SectionParaphrase {
     const systemPrompt = [
       `Return only structured JSON that matches the schema.`,
       `TASK: Paraphrase the text based on these specific constraints:`,
-      `1. Tone requirement: ${tone} — ${toneTypeDescriptions[tone]}.`,
-      `2. Length strategy: ${lengthStrategy} — ${lengthStrategyDescriptions[lengthStrategy]}.`,
+      `1. Tone requirement: ${toneTypeDescriptions[tone]}.`,
+      `2. Length strategy: ${lengthStrategyDescriptions[lengthStrategy]}.`,
       `3. STRUCTURE: Ensure the output avoids plagiarism by changing sentence structures and using synonyms appropriately.`,
       `4. Preserved Words Rule: ${preservedWordsRule}`,
       `Do not repeat the same information. If a sentence doesn't add new value, merge or delete it`,
