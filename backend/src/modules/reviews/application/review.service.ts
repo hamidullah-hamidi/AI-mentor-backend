@@ -1,11 +1,9 @@
 import { StatusCodes } from "http-status-codes";
-import { REQUIRED_SECTION_KEYS } from "../../../shared/constants/sections";
 import { env } from "../../../shared/config/env";
 import { AppError } from "../../../shared/errors/app-error";
 import type { BillingService } from "../../billing/application/billing.service";
 import type { ReviewCreditEstimatorService } from "../../billing/application/review-credit-estimator.service";
 import type { ProjectService } from "../../projects/application/project.service";
-import type { ProjectSectionKey } from "../../projects/domain/project";
 import type {
   ReviewIssue,
   ReviewRun,
@@ -34,7 +32,7 @@ export class ReviewService {
   public async triggerSectionReview(input: {
     projectId: string;
     ownerId: string;
-    sectionKey: ProjectSectionKey;
+    sectionKey: string;
   }): Promise<ReviewRun> {
     const project = await this.projectService.getProject(
       input.projectId,
@@ -81,7 +79,8 @@ export class ReviewService {
       ].join("\n");
 
     const activeGuidelinePack =
-      await this.reviewRepository.getDefaultGuidelinePack();
+      project.journal?.guidelinePack ??
+      (await this.reviewRepository.getDefaultGuidelinePack());
 
     const guidelinePack = activeGuidelinePack?.rules ?? {
       focus: [
@@ -269,8 +268,8 @@ export class ReviewService {
       }),
     );
 
-    const requiredSections = (project.sections ?? []).filter((section) =>
-      REQUIRED_SECTION_KEYS.includes(section.key),
+    const requiredSections = (project.sections ?? []).filter(
+      (section) => section.isOptional === false,
     );
     const completedRequiredSections = requiredSections.filter(
       (section) => section.content.trim().length > 0,
