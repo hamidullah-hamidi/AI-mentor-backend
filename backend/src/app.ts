@@ -1,10 +1,8 @@
 import cors from "cors";
 import express from "express";
-import fs from "node:fs";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import pinoHttp from "pino-http";
-import path from "node:path";
 import swaggerUi from "swagger-ui-express";
 import { PrismaClient } from "@prisma/client";
 import { env } from "./shared/config/env";
@@ -41,38 +39,8 @@ import { PrismaParaphraseRepository } from "./modules/paraphrasing/infrastructur
 import { OpenAiSectionParaphrase } from "./modules/paraphrasing/infrastructure/openai-section-paraphrase";
 import { createParaphraseRouter } from "./modules/paraphrasing/interface/paraphrase.routes";
 import { ReviewCreditEstimatorService } from "./modules/billing/application/review-credit-estimator.service";
-
-const escapeRegExp = (value: string): string =>
-  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-const findSpaDistPath = (): string | null => {
-  const configured = env.SPA_DIST_PATH?.trim();
-  if (configured) {
-    const resolved = path.resolve(configured);
-    if (fs.existsSync(path.join(resolved, "index.html"))) return resolved;
-  }
-
-  const maxDepth = 5;
-  const cwd = process.cwd();
-
-  for (let depth = 0; depth <= maxDepth; depth += 1) {
-    const base =
-      depth === 0 ? cwd : path.resolve(cwd, ...Array(depth).fill(".."));
-
-    const candidates = [
-      path.join(base, "frontend", "dist"),
-      path.join(base, "frontend", "build"),
-      path.join(base, "dist"),
-      path.join(base, "build"),
-    ];
-
-    for (const candidate of candidates) {
-      if (fs.existsSync(path.join(candidate, "index.html"))) return candidate;
-    }
-  }
-
-  return null;
-};
+import type { Request, Response } from "express";
+import path from "path";
 
 export const createApp = (): express.Express => {
   const prisma = new PrismaClient();
@@ -164,22 +132,11 @@ export const createApp = (): express.Express => {
     createAdminRouter(adminController, tokenService),
   );
 
-  const spaDistPath = findSpaDistPath();
-  if (spaDistPath) {
-    const apiPrefixPattern = new RegExp(
-      `^${escapeRegExp(env.API_PREFIX)}(?:/|$)`,
-    );
+  app.use(express.static("dist"));
 
-    app.use(express.static(spaDistPath));
-
-    app.get("*", (request, response, next) => {
-      if (apiPrefixPattern.test(request.path)) return next();
-      if (env.SWAGGER_ENABLED && request.path.startsWith("/docs"))
-        return next();
-
-      response.sendFile(path.join(spaDistPath, "index.html"));
-    });
-  }
+  app.get("*", (req: Request, res: Response) => {
+    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+  });
 
   app.use(createErrorHandler(logger));
   return app;
