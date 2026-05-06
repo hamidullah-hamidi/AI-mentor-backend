@@ -40,8 +40,7 @@ import { OpenAiSectionParaphrase } from "./modules/paraphrasing/infrastructure/o
 import { createParaphraseRouter } from "./modules/paraphrasing/interface/paraphrase.routes";
 import { ReviewCreditEstimatorService } from "./modules/billing/application/review-credit-estimator.service";
 import type { Request, Response } from "express";
-import path, { dirname } from "path";
-import { fileURLToPath } from "url";
+import path from "path";
 
 export const createApp = (): express.Express => {
   const prisma = new PrismaClient();
@@ -132,11 +131,7 @@ export const createApp = (): express.Express => {
     `${env.API_PREFIX}/admin`,
     createAdminRouter(adminController, tokenService),
   );
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
 
-  // Your static files (from the build folder)
-  // Assuming your React build is at frontend/dist/
   app.use(express.static(path.join(__dirname, "..", "..", "frontend", "dist")));
 
   // Catch-all route - serves index.html for any unknown route
