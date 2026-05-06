@@ -4,7 +4,6 @@
   "private": true,
   "description": "Backend for AI Mentor Case Report publication workflow.",
   "main": "dist/src/main.js",
-  "type": "module",
   "engines": {
     "node": "22.x"
   },
