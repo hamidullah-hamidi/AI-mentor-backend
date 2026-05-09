@@ -132,12 +132,14 @@ export const createApp = (): express.Express => {
     createAdminRouter(adminController, tokenService),
   );
 
-  app.use(express.static(path.join(__dirname, "..", "..", "frontend", "dist")));
+  app.use(
+    express.static(path.join(__dirname, "..", "..", "..", "frontend", "dist")),
+  );
 
   // Catch-all route - serves index.html for any unknown route
   app.get("*", (req: Request, res: Response) => {
     res.sendFile(
-      path.join(__dirname, "..", "..", "frontend", "dist", "index.html"),
+      path.join(__dirname, "..", "..", "..", "frontend", "dist", "index.html"),
     );
   });
 
